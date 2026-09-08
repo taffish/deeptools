@@ -1,0 +1,6 @@
+{
+  "artifact": "taf-deeptools-v4.0.0-r1",
+  "schema": "taffish.build/v1",
+  "source_sha256": "446af0fd1746a110d860b1fd48609992016c3c45c3b514b8681b6d7f6d5855f7",
+  "wrapper_sha256": "7992bab2cef83b24fc376482ca8e25a272973903fd536e42ce58b55593c445af"
+}

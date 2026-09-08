@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import gzip
 
 import pysam
 
@@ -45,13 +46,17 @@ def write_paired_bam(path, fragment_starts):
 
 write_paired_bam(OUTDIR / "sample1.bam", [100, 240, 500, 720])
 write_paired_bam(OUTDIR / "sample2.bam", [120, 280, 560, 800])
+write_paired_bam(OUTDIR / "sample3.bam", [100, 140, 180, 450, 480, 760])
 
 (OUTDIR / "regions.bed").write_text(
-    "chr1\t80\t230\tregion_a\n"
-    "chr1\t450\t620\tregion_b\n"
-    "chr1\t700\t920\tregion_c\n"
+    "chr1\t80\t230\tregion_a\t0\t+\n"
+    "chr1\t450\t620\tregion_b\t0\t+\n"
+    "chr1\t700\t920\tregion_c\t0\t+\n"
 )
 (OUTDIR / "genome.sizes").write_text("chr1\t1000\n")
+with gzip.GzipFile(str(OUTDIR / 'regions.bed.gz'), 'wb', mtime=0) as stream:
+    stream.write((OUTDIR / 'regions.bed').read_bytes())
 (OUTDIR / "README.txt").write_text(
-    "Tiny synthetic paired-end BAM fixtures for TAFFISH deepTools smoke tests.\n"
+    "TAFFISH deepTools 极小合成 paired-end BAM：chr1/1000bp，3 个样本，\n"
+    "用于结构、命令和运行时回归，不代表科学正确性或真实测序性能。\n"
 )
