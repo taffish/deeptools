@@ -11,6 +11,7 @@ OUTDIR.mkdir(parents=True, exist_ok=True)
 HEADER = {
     "HD": {"VN": "1.6", "SO": "coordinate"},
     "SQ": [{"SN": "chr1", "LN": 1000}],
+    "RG": [{"ID": "synthetic", "SM": "synthetic"}],
 }
 
 
@@ -27,6 +28,8 @@ def make_segment(qname, flag, start, mate_start, template_length):
     read.next_reference_start = mate_start
     read.template_length = template_length
     read.query_qualities = pysam.qualitystring_to_array("F" * 50)
+    read.set_tag("NM", 1)
+    read.set_tag("RG", "synthetic")
     return read
 
 
@@ -57,6 +60,6 @@ write_paired_bam(OUTDIR / "sample3.bam", [100, 140, 180, 450, 480, 760])
 with gzip.GzipFile(str(OUTDIR / 'regions.bed.gz'), 'wb', mtime=0) as stream:
     stream.write((OUTDIR / 'regions.bed').read_bytes())
 (OUTDIR / "README.txt").write_text(
-    "TAFFISH deepTools 极小合成 paired-end BAM：chr1/1000bp，3 个样本，\n"
-    "用于结构、命令和运行时回归，不代表科学正确性或真实测序性能。\n"
+    "TAFFISH deepTools synthetic paired-end BAM: chr1/1000bp, three samples.\n"
+    "For packaging/runtime regression, not scientific validation or performance.\n"
 )

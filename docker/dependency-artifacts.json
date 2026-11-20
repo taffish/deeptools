@@ -43,27 +43,27 @@
   ],
   [
     "deeptools",
-    "4.0.0",
+    "4.1.0",
     [
       {
-        "filename": "deeptools-4.0.0-cp312-cp312-manylinux_2_28_aarch64.whl",
-        "url": "https://files.pythonhosted.org/packages/86/ad/9aae8cfe1190303738d5d73db53a60343bdd8c74d4a1281e1ffdf936a326/deeptools-4.0.0-cp312-cp312-manylinux_2_28_aarch64.whl",
+        "filename": "deeptools-4.1.0-cp312-cp312-manylinux_2_28_aarch64.whl",
+        "url": "https://files.pythonhosted.org/packages/82/76/8417fecd515fcf32956553a78a5943ff5113e39bed1c87484be197c539ab/deeptools-4.1.0-cp312-cp312-manylinux_2_28_aarch64.whl",
         "digests": {
-          "blake2b_256": "86ad9aae8cfe1190303738d5d73db53a60343bdd8c74d4a1281e1ffdf936a326",
-          "md5": "5d53bb48756967ceca15eaec1634b46e",
-          "sha256": "be441ba11b17534cbd7c0137d0626c7ff6b27619cae6c08d1f524d6b7fc089e3"
+          "blake2b_256": "82768417fecd515fcf32956553a78a5943ff5113e39bed1c87484be197c539ab",
+          "md5": "c6a4bf355d5376f3021ea98c1d956583",
+          "sha256": "90cd8a0ef3729c26c464d2bf42178d52aa1493e2c6bef1d27e22ef084043d488"
         },
-        "size": 4820156
+        "size": 4884661
       },
       {
-        "filename": "deeptools-4.0.0-cp312-cp312-manylinux_2_28_x86_64.whl",
-        "url": "https://files.pythonhosted.org/packages/ac/84/cef01f92ef61027e8e8e462f2fde0970001472ee7041b11e5b1370d44967/deeptools-4.0.0-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "filename": "deeptools-4.1.0-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "url": "https://files.pythonhosted.org/packages/c7/9d/5f6dd9ef52f8f82b153082dab5af6642bf75039215e7bf893215910972c6/deeptools-4.1.0-cp312-cp312-manylinux_2_28_x86_64.whl",
         "digests": {
-          "blake2b_256": "ac84cef01f92ef61027e8e8e462f2fde0970001472ee7041b11e5b1370d44967",
-          "md5": "1d6ec7ce8f7cf05287659371cccf6736",
-          "sha256": "bc539b9198a7ad5ddb061b6b9cd251679764d0b4ba571bf32b6b24823a2eb5ee"
+          "blake2b_256": "c79d5f6dd9ef52f8f82b153082dab5af6642bf75039215e7bf893215910972c6",
+          "md5": "b9b1c7b3da7531d687be61623efc988c",
+          "sha256": "8375fba94dc3cc2fa6f945496025b785bdb4b8b021e7b25493c566db048b0cde"
         },
-        "size": 4673748
+        "size": 4726615
       }
     ]
   ],
@@ -262,32 +262,6 @@
           "sha256": "78cb2c6865a35ab8ff8b75fd122f6033b92a62c82801110e48ddd6c936a45d91"
         },
         "size": 6940830
-      }
-    ]
-  ],
-  [
-    "py2bit",
-    "1.0.1",
-    [
-      {
-        "filename": "py2bit-1.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-        "url": "https://files.pythonhosted.org/packages/6b/67/6ea73b2173bcb1abe3a947fbd090cf96ee1b0a75f3f690e8902dc8ffdbfa/py2bit-1.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
-        "digests": {
-          "blake2b_256": "6b676ea73b2173bcb1abe3a947fbd090cf96ee1b0a75f3f690e8902dc8ffdbfa",
-          "md5": "d45f6344581b16083659abb73e03092a",
-          "sha256": "0cbd9754342dc9595f46b18e655af01d89e78d9762b0b541fcd4e96076523275"
-        },
-        "size": 50772
-      },
-      {
-        "filename": "py2bit-1.0.1.tar.gz",
-        "url": "https://files.pythonhosted.org/packages/46/3b/9dedd2e35cebcd4eb3539514b5ac674fd45654404839e6f9eff6e25d67c7/py2bit-1.0.1.tar.gz",
-        "digests": {
-          "blake2b_256": "463b9dedd2e35cebcd4eb3539514b5ac674fd45654404839e6f9eff6e25d67c7",
-          "md5": "2796de3413432ae6e3351393abec1575",
-          "sha256": "4972f85eb3844cdfba43eb54ab3c8349a0536e03dfd7db07ca8d3447285ad20c"
-        },
-        "size": 18765
       }
     ]
   ],

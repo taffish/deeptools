@@ -1,272 +1,215 @@
 # deepTools
 
-`deeptools` packages upstream **deepTools 4.0.0** for TAFFISH, version `4.0.0-r1`.
-The command is `taf-deeptools`; packaging is Apache-2.0 and upstream is MIT.
+`deeptools` packages **deepTools 4.1.0** for TAFFISH as **4.1.0-r1**.
+
+Package: `deeptools` · command: `taf-deeptools` · kind: tool.
+Packaging is Apache-2.0; upstream is MIT.
+[Upstream release](https://github.com/deeptools/deepTools/releases/tag/4.1.0).
 
 ## What This App Packages
 
-The official Linux CPython 3.12 wheels, including the Rust implementations of
-`bamCoverage`, `bamCompare`, `computeMatrix`, `alignmentSieve` and `multiBamSummary`,
-are installed without algorithm patches. All 27 official console commands are retained,
-including the five transitional `_old` Python implementations. Python 3.12, NumPy,
-SciPy, Matplotlib/Agg and fonts, pysam, pyBigWig, py2bit, deeptoolsintervals and
-upstream-declared maturin are included. Exact versions/artifact hashes are in
-`docker/requirements.lock` and `docker/dependency-artifacts.json`.
+The unmodified official Linux CPython 3.12 amd64/arm64 wheels, including the Rust
+core, and all **20 official console commands**. The thin entry runs `deeptools`
+and enables ordinary TAFFISH command mode. No scientific algorithm patch is applied.
+The wrapper adds same-UID output handling on Docker/Podman, not a separate analysis workflow.
 
-The thin entry calls `deeptools` and retains automatic command mode. Runtime arguments
-only implement same-UID output and explicit resource binds. `deeptools-resources` is
-a separate reference installer, not a replacement analysis entrypoint.
+## Scope and Migration
 
-## Scope and Migration from 3.5.6
+This app supports indexed BAM/bigWig processing, filtering, region matrices, QC
+and headless PNG/PDF/SVG plots. Reassess analytical parameters when migrating;
+packaging checks do not assert scientific equivalence between releases.
 
-Use for BAM/bigWig processing, normalization, filtering, region matrices, QC and
-headless PNG/PDF/SVG plots. This is a **major upstream update**, not a promise of
-3.x numerical or CLI equivalence. See the [official 4.0.0 release](https://github.com/deeptools/deepTools/releases/tag/4.0.0).
+- **4.1.0 removes** `computeGCBias`, `correctGCBias` and all five transitional
+  `*_old` commands. Use the separately retained `taf-deeptools-v4.0.0-r1`
+  environment if an existing workflow needs them. This release does not alias or
+  resurrect those implementations.
+- The former `deeptools-resources` 2bit helper and `TAFFISH_DEEPTOOLS_RESOURCE_*`
+  automatic binds are retired with those GC commands. Previously installed
+  references and older wrappers are **not deleted or modified**.
+- `plotPCA` now uses scores by default; `--transpose` and `--centerRows`
+  are removed. `bamCompare --normalizeUsing RPGC` is not supported.
+- `alignmentSieve --keepTags` explicitly retains selected SAM tags with
+  `--shift`/`--ATACshift` and BAM output; it is not a standalone filter. Selected
+  tags are copied, not recalculated for the shifted coordinates.
+- `plotHeatmap --colors` colors summary profiles; `plotHeatmap` and
+  `plotProfile -p` support parallel matrix parsing.
+- Since 4.0, Plotly/interactive HTML is removed. Rust-backed commands also remove
+  `--exactScaling` and `--ignoreDuplicates`. Duplicate marking and
+  `--samFlagExclude 1024` are not equivalent to the old coordinate deduplication.
+- Use valid BED3/6/12, not incomplete BED4. Chromosome names, coordinates, assembly,
+  normalization and effective genome size must be appropriate for your experiment.
 
-- Five core names now use Rust. Their `_old` counterparts remain available for
-  transition, but are not a complete frozen 3.5.6 environment. Keep the old
-  `taf-deeptools-v3.5.6-r1` wrapper for exact historical runs.
-- `bamCoverage`/`bamCompare` remove `--exactScaling` (exact scaling is now the only
-  method) and `--ignoreDuplicates`. Mark duplicates separately and use
-  `--samFlagExclude 1024` when appropriate; marked-duplicate exclusion is not the
-  same operation as the former coordinate-based duplicate detection.
-- Plotly/interactive HTML output is removed upstream. Use static plots; several
-  plotting commands offer `--ggplot`. This app does not reintroduce Plotly.
-- PCA scaling/orientation and related options are fixed upstream. Region/blacklist
-  handling, BED block starts, missing-data treatment and f32 arithmetic also change.
-  Reassess scientific thresholds rather than asserting old/new output identity.
-- Gzipped BED/GTF and blacklists are supported by the relevant new Rust commands.
-  Chromosome names and assembly still must match every BAM, bigWig and interval input.
-- The new Rust BED parser accepts exactly BED3/6/12; a four-column named BED accepted
-  by the old command now fails with `Invalid BED format`. Supply a complete BED6
-  (including scientifically appropriate score/strand) or use `computeMatrix_old`.
-  Packaging does not silently rewrite intervals. The smoke fixture uses explicit BED6.
+## Container Contents
 
-Official **Galaxy integration** is a separate deployment: the upstream `galaxy/`
-Tool Shed wrappers require an existing Galaxy server, administrator access and its
-storage/authentication lifecycle. Python extras contain docs/actions, not a local
-desktop GUI. This app preserves the CLI surface; it does not install Galaxy/noVNC,
-open ports or manage a web service. Use the upstream-linked
-[European Galaxy service](https://usegalaxy.eu/) or separately administered Galaxy
-for that interface. No claim of Galaxy version parity or private-data suitability is made.
+`deeptools`, `bamCoverage`, `bamCompare`, `alignmentSieve`, `multiBamSummary`,
+`multiBigwigSummary`, `bigwigAverage`, `bigwigCompare`, `computeMatrix`,
+`computeMatrixOperations`, `plotHeatmap`, `plotProfile`, `plotCorrelation`,
+`plotPCA`, `plotCoverage`, `plotFingerprint`, `plotEnrichment`, `bamPEFragmentSize`,
+`estimateReadFiltering` and `estimateScaleFactor` are available.
+
+Python 3.12, NumPy, SciPy, Matplotlib/Agg, fonts, pysam, pyBigWig,
+deeptoolsintervals and upstream-declared maturin are included.
+Exact Python pins and accepted artifact hashes are in `docker/requirements.lock`
+and `docker/dependency-artifacts.json`. Rust licenses and Cargo.lock are bundled
+under `/opt/deeptools/share/doc/deeptools/upstream`; wheel SBOMs remain installed.
 
 ## Installation and Usage
 
-Install TAFFISH and a usable Docker, Podman or native Linux Apptainer backend first.
-After this immutable release is published and appears in the Hub Index:
+Install TAFFISH and a working Docker, Podman or native Linux Apptainer backend.
+After this version is published and indexed:
 
 ```sh
-taf install deeptools 4.0.0-r1
-taf-deeptools-v4.0.0-r1 --version
-```
-
-Examples use the unversioned alias `taf-deeptools`; use the fixed wrapper above in
-reproducible records. App installation and reference installation are separate.
-
-```sh
+taf install deeptools 4.1.0-r1
+taf-deeptools-v4.1.0-r1 --help
 taf-deeptools -- --help
+taf-deeptools -- --version
 taf-deeptools bamCoverage --help
-taf-deeptools bamCoverage -b sample.bam -o sample.bw --binSize 50 --normalizeUsing CPM -p 4
-taf-deeptools multiBamSummary bins -b a.bam b.bam -o counts.npz --binSize 1000 -p 4
-taf-deeptools plotCorrelation -in counts.npz --corMethod pearson --whatToPlot heatmap -o correlation.png
-taf-deeptools computeMatrix scale-regions -S sample.bw -R genes.bed -o matrix.gz -p 4
-taf-deeptools plotHeatmap -m matrix.gz -out heatmap.pdf
 ```
 
-Put inputs and outputs under the current working directory (automatically bound by
-TAFFISH), or provide an explicit site-specific bind. Keep BAM indices alongside
-coordinate-sorted BAMs. Never use a wrapper argument named `bins` or `scale-regions`
-as the first command: use the full executable name before its subcommand.
-`-- --help` forwards option-leading default-command help; `--` does not disable
-automatic command-mode interpretation of bare subcommands.
+Keep a writable project directory; place inputs and outputs underneath it:
+
+```sh
+cd "/path/to/my project"
+taf-deeptools bamCoverage -b "'input/sample A.bam'" -o "'coverage A.bw'" --binSize 10 -p 4
+taf-deeptools computeMatrix scale-regions -S "'coverage A.bw'" -R input/regions.bed \
+  -o matrix.gz --regionBodyLength 1000 -p 4
+taf-deeptools plotHeatmap -m matrix.gz -out heatmap.png -p 4
+taf-deeptools plotProfile -m matrix.gz -out profile.pdf -p 4
+```
+
+These examples show invocation syntax, not recommended biological parameters.
+The same commands apply to Docker, Podman and Apptainer; select the engine using
+`TAFFISH_CONTAINER_BACKEND=docker`, `podman` or `apptainer`.
+
+## Command Mode and Paths
+
+A non-option-leading word selects that packaged executable, e.g.
+`taf-deeptools bamCoverage ...`. `--help`, `--version` and
+`--compile` belong to the wrapper; `-- --help` and `-- --version`
+reach the default upstream executable.
+
+TAFFISH 0.12 command mode joins forwarded arguments as shell text; ordinary shell
+quotes alone do not preserve a spaced filename. For simple paths containing
+spaces, keep the inner quote characters literally, as in
+`-b "'sample A.bam'" -o "'coverage A.bw'"`. This form was verified through the real
+wrapper on all three backends. The outer double quotes are consumed by the host
+shell; the inner single quotes reach the generated command. Quote `cd` normally.
+Prefer simple filenames; names containing quote characters or shell metacharacters
+are not covered by this workaround. Do not pass untrusted text as shell arguments.
+
+Current-directory files are visible through the wrapper's normal work bind. A
+host absolute path outside that bind is not automatically a container path. For
+a site-managed shared input directory, mount it read-only to the same fixed
+container destination:
+
+```sh
+# Run from the writable project directory; /srv/shared/deeptools-inputs must exist.
+TAFFISH_CONTAINER_BACKEND=docker \
+  TAFFISH_DOCKER_RUN_ARGS='--volume=/srv/shared/deeptools-inputs:/reference:ro' \
+  taf-deeptools bamCoverage -b /reference/sample.bam -o coverage.bw -p 4
+TAFFISH_CONTAINER_BACKEND=podman \
+  TAFFISH_PODMAN_RUN_ARGS='--volume=/srv/shared/deeptools-inputs:/reference:ro' \
+  taf-deeptools bamCoverage -b /reference/sample.bam -o coverage.bw -p 4
+TAFFISH_CONTAINER_BACKEND=apptainer \
+  TAFFISH_APPTAINER_RUN_ARGS='--bind=/srv/shared/deeptools-inputs:/reference:ro' \
+  taf-deeptools bamCoverage -b /reference/sample.bam -o coverage.bw -p 4
+```
+
+Use a host mount path without spaces or runtime-argument metacharacters in these
+extra-argument forms; quoting file arguments is a separate issue. Administrators
+prepare complete readable inputs and BAM indexes once, including traversal
+permissions on all parent directories. Ordinary users need no write permission
+on shared inputs. Do not chmod shared directories globally to fix one task.
 
 ## Inputs and Outputs
 
-| Input | Meaning and boundary |
+| Input | Requirements |
 | --- | --- |
-| BAM + BAI | Coordinate-sorted reads, index and consistent reference names |
-| bigWig | Coverage tracks; check normalization/assembly before comparison |
-| BED/GTF/blacklist | Explicit project intervals; not downloaded or chosen automatically |
-| genome `.2bit` | GC routines; exact assembly/chromosomes matching the BAM |
-| effective genome size | User-chosen scientific parameter, not guessed by the installer |
+| BAM and index | Coordinate-sorted, indexed; pair flags/assembly must match the task |
+| bigWig | Correct chromosome names and coordinate space |
+| BED/GTF/blacklist | Appropriate intervals; new Rust BED parser accepts BED3/6/12 |
+| Matrix/NPZ | Produced by the corresponding deepTools command, not arbitrary gzip/ZIP |
 
-Outputs include bigWig/bedGraph tracks, NPZ summaries, gzipped region matrices,
-filtered/corrected BAMs, GC frequency tables and static plots. Choose explicit output
-names in writable directories. Resource verification proves file identity and 2bit
-readability, not assembly compatibility, scientific correctness or analysis quality.
+Outputs are explicit bigWig/BAM, compressed matrices, NPZ, tabular counts or plots
+in the work directory. Names may be overwritten by upstream; use new output names
+and keep input backups. Plot files can be opened with an external image/PDF/SVG
+viewer. No browser service or port is needed. Cache/temp writes use the runtime
+temporary directory; Matplotlib uses Agg.
 
 ## Resources, Databases, and Platform
 
-No model or database is fetched on startup or during local-file analysis. Remote
-BAM/bigWig URLs are still an upstream opt-in and require network access. The smallest
-reusable reference member is one assembly-specific `.2bit`, not the entire genome catalog.
-An explicit catalog is provided for two fixed snapshots; it is **not an exhaustive
-list of supported organisms**. Other authorized references use `local-*` import.
+The installed 4.1.0 command suite has no model/reference-database installer.
+BAM, bigWig and interval files are explicit project inputs; local workflows do not
+download missing inputs automatically. Remote bigWig URLs, where supported by
+pyBigWig/upstream, explicitly opt into network access and external availability.
 
-| Resource ID | Assembly | Bytes | SHA256 |
-| --- | --- | ---: | --- |
-| `ucsc-sacCer3-b061b22f` | UCSC sacCer3 | 3039745 | `b061b22fdce3cb82c24d85101bc6eae98d23ea7194c1888c966b5446dd7909ab` |
-| `ucsc-hg38-1f67aaa1` | UCSC initial GRCh38, not a later patch release | 835393456 | `1f67aaa17a77b327738fe750ab37430a85dddf73c7d9189385ad1839259acec0` |
+`--effectiveGenomeSize` is a numeric analysis parameter, not a downloadable
+resource selection. Consult the
+[upstream effective genome size documentation](https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html).
+The source repository's `scripts/ess.py` regenerates documentation tables,
+downloads multiple genomes and uses separate Kent/khmer tools; it is not a wheel
+entrypoint and is not included as a supported end-user pipeline here. Its outputs
+are not silently used to choose a scientific parameter.
 
-Sources are UCSC `goldenPath/<assembly>/bigZips/<assembly>.2bit`. The installer
-pins complete-file SHA256 and bytes; `resource.json` records source, assembly,
-chromosome inventory, timestamp and installing UID. `SHA256SUMS`/`READY` cover the
-complete installed unit; incomplete, altered or extra members fail verification.
-Automatic mounting checks the same four regular members, checksum inventory and
-the selected ID before launching the upstream command. A root-directory symlink
-is resolved to its physical directory; symlinks inside the unit are rejected.
-ID-based discovery must match `resource.json.resource`, including fixed catalog
-payload hashes. Explicit `RESOURCE_PATH` still overrides an ID selection.
-For manual verification with an expected identity, use
-`deeptools-resources verify ROOT --expected-resource ID`. Prepared units are
-installer-produced, immutable local resources, not an authentication boundary
-against an administrator able to replace both data and all receipts.
+Linux amd64 and arm64 are supported using official architecture-specific wheels.
+Base image identity and Python artifacts are pinned, but Debian repositories and
+external package hosting can change or remove historical files. Dockerfile comments
+identify this rebuild boundary; locks do not promise indefinite upstream retention.
 
-Choose a reference **only after confirming its scientific suitability**. Personal installation:
+## GUI and Other Boundaries
 
-```sh
-base="${TAFFISH_USER_HOME:-$HOME/.local/share/taffish}/resources/deeptools"
-mkdir -p "$base"
-TAFFISH_CONTAINER_BACKEND=docker TAFFISH_DEEPTOOLS_RESOURCE_INSTALL_ROOT="$base" \
-  taf-deeptools deeptools-resources install --resource ucsc-sacCer3-b061b22f --resource-root /resource-install
-export TAFFISH_DEEPTOOLS_RESOURCE_ID=ucsc-sacCer3-b061b22f
-taf-deeptools deeptools-resources verify /deeptools-resource
-```
+PNG/PDF/SVG are static native Matplotlib outputs. No HTML, interactive plotting
+service, noVNC or display server is added. Galaxy is an independent server deployment
+requiring its own administrator, storage and authentication; it is not called by
+the CLI and is outside this app. See the [official Galaxy service](https://usegalaxy.eu/)
+or deploy Galaxy separately under your site's data policies.
 
-Replace `docker` with `podman` or `apptainer` for the same installed-wrapper command.
-Only installation receives a writable `/resource-install`; selection receives a
-read-only `/deeptools-resource`. No whole-family download or implicit assembly choice.
+## Troubleshooting
 
-An administrator installs once; ordinary users reuse the resource read-only.
-For **administrator-once sharing**, an administrator may create
-`/usr/local/share/taffish/resources/deeptools` with traversable 0755 parents, then
-run the same explicit installer with `TAFFISH_DEEPTOOLS_RESOURCE_INSTALL_ROOT` set
-to that parent using an already working backend. No automatic sudo or permission
-changes are performed. Installed member directories are 0755, files 0644. Ordinary
-users reuse the shared reference read-only: select the ID and read
-`/deeptools-resource/genome.2bit`; no repeated download.
-This workflow must respect the administrator's backend/root policy.
-
-Selection precedence: explicit `TAFFISH_DEEPTOOLS_RESOURCE_PATH` (one installed unit),
-otherwise `TAFFISH_DEEPTOOLS_RESOURCE_ID` searches
-`${TAFFISH_USER_HOME:-$HOME/.local/share/taffish}/resources/deeptools/<ID>`,
-`/usr/local/share/taffish/resources/deeptools/<ID>`, then
-`/opt/taffish/resources/deeptools/<ID>`. Set `TAFFISH_DEEPTOOLS_RESOURCE_AUTO_MOUNT=0`
-to disable selection; an explicit install root is a separate higher-priority mode.
-Auto-bind paths require a physical path containing only letters, digits, `_ . / + -`.
-Use a safe path or a manually configured backend bind when this restriction matters.
-
-For other authorized 2bit references, bind or place the source under the current
-directory, then use a **new** `local-*` ID and recorded license/assembly:
-
-```sh
-TAFFISH_DEEPTOOLS_RESOURCE_INSTALL_ROOT="$base" taf-deeptools deeptools-resources install \
-  --resource local-myassembly-sha8 --resource-root /resource-install --source reference.2bit \
-  --sha256 YOUR_64_HEX_SHA256 --assembly MY_ASSEMBLY --license-note '"Authorized source and sharing terms"'
-```
-
-Do not treat the license note as a license grant. Fixed genomes follow
-[UCSC data-use terms](https://genome.ucsc.edu/license/) and underlying assembly
-rights, **not** this app's Apache/MIT licenses. No liftOver chains or restricted
-browser/BLAT software are included. Attribute UCSC and original assembly contributors.
-
-Installation checks free space (2× source bytes + 64 MiB), uses a private lock/stage,
-resumes HTTPS downloads, verifies before atomic promotion and never overwrites an
-existing unit. Reinstallation verifies the full identity and exits without writes.
-`--dry-run` shows requirements without creating directories or contacting a server.
-Failed `.downloads/<SHA256>.part` files are retained for diagnosis; handled failures
-release this process's own lock. A pre-existing lock is never removed automatically:
-inspect its owner before recovery, never remove another active lock.
-After successful verification an administrator may remove only the matching cached
-download to reclaim space; installed `genome.2bit` is independent of that cache.
-
-## Backend Usage and Capability Matrix
-
-Native platforms are `linux/amd64` and `linux/arm64`. CPU-only plotting needs no GPU,
-display, X11, noVNC or port forwarding. macOS uses a Linux Docker/Podman VM;
-Apptainer requires Linux, including Linux arm64 (not native macOS).
-
-| Capability | Docker | Podman | Apptainer |
-| --- | --- | --- | --- |
-| Explicit selection | `TAFFISH_CONTAINER_BACKEND=docker taf-deeptools bamCoverage --help` | `TAFFISH_CONTAINER_BACKEND=podman taf-deeptools bamCoverage --help` | `TAFFISH_CONTAINER_BACKEND=apptainer taf-deeptools bamCoverage --help` |
-| Fixed resource install | Same installer above with `docker` | Same installer with `podman` | Same installer with `apptainer` and actual writable bind |
-| Resource analysis | Automatic readonly `/deeptools-resource` | Automatic readonly `/deeptools-resource` | Automatic readonly `/deeptools-resource`; SIF stays readonly |
-| Desktop/Galaxy service | Not packaged; use separate Galaxy | Not packaged; use separate Galaxy | Not packaged; use separate Galaxy |
-
-Manual resource fallback (set `root` to a verified installed unit):
-
-```sh
-export TAFFISH_DEEPTOOLS_RESOURCE_AUTO_MOUNT=0
-TAFFISH_CONTAINER_BACKEND=docker TAFFISH_DOCKER_RUN_ARGS="-v $root:/deeptools-resource:ro" taf-deeptools deeptools-resources verify /deeptools-resource
-TAFFISH_CONTAINER_BACKEND=podman TAFFISH_PODMAN_RUN_ARGS="-v $root:/deeptools-resource:ro" taf-deeptools deeptools-resources verify /deeptools-resource
-TAFFISH_CONTAINER_BACKEND=apptainer TAFFISH_APPTAINER_RUN_ARGS="--bind $root:/deeptools-resource:ro" taf-deeptools deeptools-resources verify /deeptools-resource
-```
-
-Temporary files go to writable `/tmp`/`TMPDIR`, explicit outputs to the work directory,
-and persistent references only to actual binds. Matplotlib uses Agg; if its normal
-user cache is unwritable it creates a temporary cache. To persist a cache, explicitly
-run `taf-deeptools env MPLCONFIGDIR=/path/to/writable/bound/cache plotHeatmap ...`.
-No runtime chmod/chown of image contents, fake mount markers or Docker VOLUME dependency.
-
-## Troubleshooting and Boundaries
-
-- Missing chromosome/empty matrix: compare assembly, naming, intervals and coverage;
-  a correctly downloaded reference may still be the wrong reference for your BAM.
-- Removed 3.x flags/HTML: use the migration notes and each current command's help.
-- `correctGCBias` retains an upstream shell `cp` path in its single-chunk output
-  branch; use paths **without whitespace/shell metacharacters** for this command.
-  Other commands still need TAFFISH shell quoting, e.g. `'"output with spaces.bw"'`.
-- Readonly error: choose writable output/scratch and a real install bind; do not
-  chmod the SIF or modify `/opt`. Resolve corrupt selected resources before analysis.
-- Resources and tests do not supply scientific parameter defaults, validation on
-  real studies, full organism databases, Galaxy deployment or performance guarantees.
+- Missing files: check the current-directory bind and explicit mounts; host paths
+  outside mounts are not visible. Keep a BAM index next to its BAM.
+- Invalid BED or labels: correct intervals/column count and provide one label per
+  input. This app does not silently repair analytical inputs.
+  Upstream can warn and skip reversed/empty BED intervals while exiting zero;
+  inspect warnings and matrix row counts, not only the exit status.
+- Removed command/argument: follow the migration section or select an older
+  versioned wrapper; `*_old` and GC commands are not in 4.1.0.
+- Permission failure: use a writable work directory and readable shared inputs.
+  Do not run the whole analysis as root to bypass permissions.
+- Blank/uninformative plot: inspect actual counts/matrix and input assembly; a
+  successful plot command is not proof of meaningful scientific data.
 
 ## Testing
 
-The Dockerfile uses only version/dependency identity and a tiny BAM→BigWig check.
-The independent offline manifest tests cover all command help, five Rust and five
-legacy entrypoints, gzip regions, summaries, PNG/PDF/SVG/PCA, GC routines and resource
-integrity/idempotence. Synthetic and tiny upstream fixtures are retained read-only.
-Full renders are runtime tests, not QEMU-sensitive build-time assertions.
+The 4.1.0-r1 candidate was built and tested natively on 2026-11-19: ARM64 with
+Docker/Podman, and Linux amd64 with Docker/Podman/Apptainer. The final generated
+wrapper passed help/version/compile, the actual BAM-to-bigWig-to-matrix workflow,
+paths containing spaces using the literal-quote form above, read-only shared
+inputs, output ownership, error status
+and temporary-file cleanup. Actual ATAC shifts retain only requested tags;
+injected command failures expose their stage, exit status and diagnostic tail.
 
-Final candidate validation: native arm64 Docker/Podman and native amd64 Docker/
-Podman/Apptainer all pass their complete fresh, offline manifest tests; Docker/Podman
-also pass the read-only-root proxy (369/369 exact checks across nine groups).
-Apptainer uses a real read-only SIF made from
-the same amd64 OCI candidate, not an emulation or proxy claim. Full wrapper tests
-pass 188/188 checks, including actual writable installation binds, read-only
-reference reuse and plots. Regressions reject selected-ID mismatches, symlinked,
-missing or extra members, malformed/traversing checksum inventories and false
-catalog payloads before launching the upstream command. Correct explicit overrides
-and physical root-directory symlinks remain usable.
-Both complete catalog genomes were imported and verified through all three backends;
-the HTTPS installer also passed a resumed sacCer3 download and offline reinstall.
+All 26 manifest existence checks and six smoke commands were executed independently
+in fresh offline containers, plus the combined existence gate. Docker/Podman also
+passed the same commands with a read-only root and an ordinary user. The amd64 SIF
+was converted from the tested OCI image and run as an ordinary user.
+Static PNG/PDF/SVG outputs were inspected; no HTML service is claimed.
 
-Earlier interrupted Docker and failed preflight diagnostics remain historical
-evidence, not accepted checks; the repaired candidate was rebuilt and retested.
-No host service was restarted. Linux arm64 Apptainer was not separately tested.
-Both native-platform and supported-backend evidence dimensions
-are closed, without an architecture-specific resource/GPU/GUI coupling; this is
-not a claim of a fully tested platform × backend Cartesian product.
-
-Docker image sizes are 456912861 bytes (arm64) and 423509949 bytes (amd64).
-Podman reports 465388087 bytes for the same arm64 image ID because of engine size
-accounting; these are not different candidates. Build-stage
-compilers/caches and unused NumPy/SciPy test trees are excluded; runtime modules,
-fonts, Python licenses and 165 fixed Rust crate notice sets are retained. The
-upstream-declared maturin dependency remains installed rather than breaking its
-metadata contract. No large genome reference is baked into either image.
-
-See `release.md` for evidence and release boundaries. Tiny tests do not replace
-scientific validation on real experiments. Administrator-once sharing was exercised
-through ordinary-user private site copies with 0755/0644 permissions and read-only
-binds, not by modifying a real system directory or switching to root.
+Build-time checks remain limited to identity and tiny non-rendering coverage;
+full plotting and negative checks run after the build, not as architecture-sensitive
+build gates. Final Docker image sizes were 457,226,590 bytes (arm64) and
+423,894,941 bytes (amd64), approximately 0.07% and 0.09% above the preceding
+4.0.0-r1 measurements. These tests verify packaging, not scientific accuracy on
+production data. Local acceptance is not publication or public CI/Index acceptance.
 
 ## License and Citation
 
-Packaging: Apache-2.0 (`LICENSE`). deepTools: MIT; upstream notices, Cargo.lock and
-dependency freezes are under `/opt/deeptools/share/doc/deeptools/`. Debian copyright
-files and Python distribution/bundled-library license files are retained.
-
-Ramírez et al. (2016), *deepTools2: a next generation web server for deep-sequencing
-data analysis*. [doi:10.1093/nar/gkw257](https://doi.org/10.1093/nar/gkw257).
+TAFFISH packaging: Apache-2.0. deepTools: MIT; third-party libraries retain their
+licenses and installed notices. No external user data license is granted.
+The wheel source is the official tag 4.1.0,
+commit `c678938e18dfaa801484a78b8328da7e6a4b3006`.
+Cite Deboutte et al. (2026), deepTools4 (bioRxiv preprint), DOI
+[10.64898/2026.11.11.765524](https://doi.org/10.64898/2026.11.11.765524),
+and Ramirez et al. (2016), deepTools2, DOI
+[10.1093/nar/gkw257](https://doi.org/10.1093/nar/gkw257), and follow current upstream
+citation guidance for the methods used.
